@@ -2,7 +2,7 @@
 test: src/MS2Frame.class
 	echo 20 > config/t.NoLine
 	mkdir -p video
-	java src.MS2Frame sample-input | ffmpeg -r `cat config/r.NoLine` -i pipe:0 -vcodec libx264 -pix_fmt yuv420p -acodec aac -y -ss 0 -t `cat config/t.NoLine` "video/`date`.mp4"
+	java src.MS2Frame sample-input | ffmpeg -r `head -1 config/r.head-1` -i pipe:0 -vcodec libx264 -pix_fmt yuv420p -acodec aac -y -ss 0 -t `head -1 config/t.head-1` "video/`date`.mp4"
 #ffmpeg的选项 -vcodec libx264 -pix_fmt yuv420p 能让输出视频兼容大部分系统默认播放器
 
 sample: src/MS2Frame.class

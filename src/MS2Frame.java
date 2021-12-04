@@ -9,7 +9,7 @@ public class MS2Frame{
     public static final String FRAME_FORMAT = "bmp";	//需考虑ffmpeg能否解码
     public static final String FILE_SEP = "/";
     
-    private static final int F_OUT_DEBUG = readNoLine("f-out-debug");
+    private static final int F_OUT_DEBUG = readHead1("f-out-debug");
     private static final String F_OUT_PATH = "F_OUT_DEBUG";
     private static int F_OUT_SUFFIX = 0;
     private static OutputStream sOut() { //TODO:外置类，cmake
@@ -26,9 +26,9 @@ public class MS2Frame{
     private static PrintStream sErr() {
 	    return System.err;
     }
-    private static int readNoLine(String configName){
+    private static int readHead1(String configName){
     	try{
-    		String path = "config"+FILE_SEP+configName+".NoLine";
+    		String path = "config"+FILE_SEP+configName+".head-1";
     		FileInputStream fOut = new FileInputStream(path);
     		return new Scanner(fOut).nextInt();
     	}catch(FileNotFoundException ex){
@@ -38,7 +38,7 @@ public class MS2Frame{
 
     public static final boolean DEBUG = false;
     public static final int REPEAT = ( F_OUT_DEBUG!=0 ? 1 : ( DEBUG ? 2 : 3 ) );
-    public static final int HALF_HDP = readNoLine("half-hdp");
+    public static final int HALF_HDP = readHead1("half-hdp");
     public static final float TARGET_H = 0.05f;	//目标色相与0.0f的距离
     public static final float TARGET_S = 1.0f;	//目标饱和度
     public static final double TARGET_MUL_B = 0.5;	//亮度增量乘数
@@ -73,7 +73,7 @@ public class MS2Frame{
 	SecretKey sks = new SecretKey(password);
 	*/
 	
-	int pictureCount = readNoLine("t")*readNoLine("r") / (2*HALF_HDP*REPEAT);
+	int pictureCount = readHead1("t")*readHead1("r") / (2*HALF_HDP*REPEAT);
 	
 	File dir;
 	for(int k=0;k<args.length;++k){
