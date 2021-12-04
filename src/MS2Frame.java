@@ -9,11 +9,11 @@ public class MS2Frame{
     public static final String FRAME_FORMAT = "bmp";	//需考虑ffmpeg能否解码
     public static final String FILE_SEP = "/";
     
-    private static final boolean F_OUT_DEBUG = false;
+    private static final int F_OUT_DEBUG = readNoLine("f-out-debug");
     private static final String F_OUT_PATH = "F_OUT_DEBUG";
     private static int F_OUT_SUFFIX = 0;
     private static OutputStream sOut() { //TODO:外置类，cmake
-	if( ! F_OUT_DEBUG) return System.out;
+	if( F_OUT_DEBUG == 0 ) return System.out;
 	++F_OUT_SUFFIX; 
 	try{
 		new File(F_OUT_PATH).mkdir();
@@ -37,7 +37,7 @@ public class MS2Frame{
     }
 
     public static final boolean DEBUG = false;
-    public static final int REPEAT = ( F_OUT_DEBUG ? 1 : ( DEBUG ? 2 : 3 ) );
+    public static final int REPEAT = ( F_OUT_DEBUG!=0 ? 1 : ( DEBUG ? 2 : 3 ) );
     public static final int HALF_HDP = 8;
     public static final float TARGET_H = 0.05f;	//目标色相与0.0f的距离
     public static final float TARGET_S = 1.0f;	//目标饱和度
@@ -53,9 +53,9 @@ public class MS2Frame{
 	    }
     }
     public static String pathS2M(String path) {
-	int index = FILE_SEP.length() + path.lastIndexOf(FILE_SEP+"S"+FILE_SEP);
+//	int index = FILE_SEP.length() + path.lastIndexOf(FILE_SEP+"S"+FILE_SEP);
 	StringBuilder sb = new StringBuilder(path);
-	sb.setCharAt(index, 'M');
+//	sb.setCharAt(index, 'M');
 	return sb.substring( 0 , path.lastIndexOf('.') );//去掉后缀
     }
     public static void main(String[] args) throws IOException {
