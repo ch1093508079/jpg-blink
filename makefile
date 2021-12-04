@@ -5,10 +5,13 @@ test: src/MS2Frame.class
 	java src.MS2Frame MandS/S/* | ffmpeg -r `cat config/r.NoLine` -i pipe:0 -vcodec libx264 -pix_fmt yuv420p -acodec aac -y -ss 0 -t `cat config/t.NoLine` "video/`date`.mp4"
 #ffmpeg的选项 -vcodec libx264 -pix_fmt yuv420p 能让输出视频兼容大部分系统默认播放器
 
+src/MS2Frame.class: src/MS2Frame.java
+	javac -encoding UTF-8 src/MS2Frame.java
+
 select_w_div_h: src/SelectWDivH.class
 	java src.SelectWDivH ../pWarehouse/M/*/*.JPG
 src/SelectWDivH.class: src/SelectWDivH.java
-	javac src/SelectWDivH.java
+	javac -encoding UTF-8 src/SelectWDivH.java
 
 clean:
 	rm src/*.class

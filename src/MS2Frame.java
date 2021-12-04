@@ -47,7 +47,7 @@ public class MS2Frame{
 	    java.util.Random r = new java.util.Random();
 	    for(int i=0; i < array.length ; ++i){
 		    int t = r.nextInt(array.length);
-		    var temp = array[i];
+		    File temp = array[i];
 		    array[i] = array[t];
 		    array[t] = temp;
 	    }
