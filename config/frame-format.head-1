@@ -1,3 +1,12 @@
 bmp
 
-#需考虑ffmpeg能否解码
+# 需考虑ffmpeg能否解码
+## 时间测试：
+### png : 
+real	1m15.777s
+user	1m26.513s
+sys	0m16.687s
+### bmp : 
+real	0m30.338s
+user	0m39.974s
+sys	0m14.011s
