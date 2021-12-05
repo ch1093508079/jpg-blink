@@ -12,7 +12,7 @@ public class MS2Frame{
     private static final int F_OUT_DEBUG = string2int(readHead1("f-out-debug"));
     private static final String F_OUT_PATH = "F_OUT_DEBUG";
     private static int F_OUT_SUFFIX = 0;
-    private static OutputStream sOut() { //TODO:外置类，cmake
+    private static OutputStream sOut() {
 	if( F_OUT_DEBUG == 0 ) return System.out;
 	++F_OUT_SUFFIX; 
 	try{
@@ -109,12 +109,11 @@ public class MS2Frame{
 		mp = pathS2M(sp);
 		mf = new File(mp);
 		if( ! mf.exists() ){
-			sErr().println("掩码图"+sp+"没找到源图："+mf.getPath());
+			sErr().println("掩码图"+sp+"没找到源图："+mp);
 			continue;
 		}
 		if( mf.isDirectory() || ( ! sf.isFile()) ) 
 			throw new AssertionError();
-		//TODO: Fileperate.getInputStream(f, sks);
 		s = ImageIO.read(sf);
 		m = ImageIO.read(mf);
 		++successCount;
@@ -130,7 +129,7 @@ public class MS2Frame{
 	int rb=-1,re=0,cb=(c-1),ce=0; // 二维for循环计算 选区 窗口 矩阵 坐标
 	for(int i=0; i<r; ++i){
 	    for(int j=0; j<c; ++j){
-		if( isChooes( s,i,j ) ){
+		if( Tools.isChooes( s,i,j ) ){
 		    if(rb == -1) rb = i; // 首个选区像素可确定rb
 		    re = i; // 最后一个选区像素可确定re
 		    cb = (j<cb)?j:cb;
@@ -138,6 +137,11 @@ public class MS2Frame{
 	   	}
 	    }
 	}
+	//以上均为优化运行时间的设计，如不需要可直接调用 screen2frame(0, r, 0, c, m, s)
+	screen2frame(rb, re, cb, ce, m, s);
+    }
+    public static void screen2frame(int rb, int re, int cb, int ce, 
+    					BufferedImage m, BufferedImage s) {
 	BufferedImage[] frames = new BufferedImage[HALF_HDP*2];
 	frames[0] = m;	//首帧使用（可能被darker()处理过的）m 
 /* 三重循环算出半程帧并引用于后半程 ( 以 HALF_HDP==6 , step==30时为例 ) 
@@ -146,12 +150,12 @@ public class MS2Frame{
  */
 	float[] hsbvals = new float[3];
 	for(int k=1; k <= HALF_HDP ;k++){ 
-	    frames[k] = imClone(m);
+	    frames[k] = Tools.imClone(m);
 	    for(int x = rb; x <= re; ++x){
 	    	for(int y = cb; y <= ce; ++y){
-			if( ! isChooes(s,x,y))
+			if( ! Tools.isChooes(s,x,y))
 				continue;
-			getHSB(m, x, y, hsbvals); 
+			Tools.getHSB(m, x, y, hsbvals); 
 			computeHSB(hsbvals, k);
 			frames[k].setRGB(x,y, Color.HSBtoRGB(hsbvals[0],
 						hsbvals[1],hsbvals[2]));
@@ -179,17 +183,21 @@ public class MS2Frame{
 		throw new AssertionError();
 	}
     }
+}
+class Tools{
+    public static final int whiteRGB = Color.WHITE.getRGB();
+    /** 当前版本只有 s 中的纯白像素才是选区 */
+    public static boolean isChooes(BufferedImage s, int x, int y) {
+	return s.getRGB(x,y) == whiteRGB;
+    }
+    /** 获取指定坐标的hsb值并修改实际参数 */
+    public static void getHSB(BufferedImage m, int x, int y,float[] hsb){
+	int rgb = m.getRGB(x,y);
+	Color.RGBtoHSB( (rgb>>>16)&0xff, (rgb>>>8)&0xff, rgb&0xff, hsb);
+    }
     public static BufferedImage imClone(BufferedImage from) {
 	BufferedImage to = new BufferedImage(from.getWidth(), from.getHeight(), from.getType());
         to.setData(from.getData());
 	return to;
-    }
-    public static void getHSB(BufferedImage m, int x,int y,float[] hsb){
-	int rgb = m.getRGB(x,y);
-	Color.RGBtoHSB( (rgb>>>16)&0xff, (rgb>>>8)&0xff, rgb&0xff, hsb);
-    }
-    /** 当前版本只有 s 中的纯白像素才是选区 */
-    public static boolean isChooes(BufferedImage s, int x, int y) {
-	return s.getRGB(x,y) == Color.WHITE.getRGB();
     }
 }
