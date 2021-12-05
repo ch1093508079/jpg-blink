@@ -6,10 +6,10 @@ import java.awt.image.*;
 import javax.imageio.*;
 
 public class MS2Frame{
-    public static final String FRAME_FORMAT = "bmp";	//需考虑ffmpeg能否解码
+    public static final String FRAME_FORMAT = readHead1("frame-format");
     public static final String FILE_SEP = "/";
     
-    private static final int F_OUT_DEBUG = readHead1("f-out-debug");
+    private static final int F_OUT_DEBUG = string2int(readHead1("f-out-debug"));
     private static final String F_OUT_PATH = "F_OUT_DEBUG";
     private static int F_OUT_SUFFIX = 0;
     private static OutputStream sOut() { //TODO:外置类，cmake
@@ -20,25 +20,35 @@ public class MS2Frame{
 		String name = F_OUT_SUFFIX+"."+FRAME_FORMAT;
 		return new FileOutputStream(F_OUT_PATH + FILE_SEP + name);
 	}catch(FileNotFoundException ex){
+    		ex.printStackTrace();
 		throw new AssertionError();
 	}
     }
     private static PrintStream sErr() {
 	    return System.err;
     }
-    private static int readHead1(String configName){
+    private static String readHead1(String configName){
     	try{
     		String path = "config"+FILE_SEP+configName+".head-1";
     		FileInputStream fOut = new FileInputStream(path);
-    		return new Scanner(fOut).nextInt();
+    		return new Scanner(fOut).nextLine();
     	}catch(FileNotFoundException ex){
+    		ex.printStackTrace();
+    		throw new AssertionError();
+    	}
+    }
+    private static int string2int(String str){
+    	try {
+    		return Integer.parseInt(str);
+    	} catch (NumberFormatException ex) {
+    		ex.printStackTrace();
     		throw new AssertionError();
     	}
     }
 
     public static final boolean DEBUG = false;
     public static final int REPEAT = ( F_OUT_DEBUG!=0 ? 1 : ( DEBUG ? 2 : 3 ) );
-    public static final int HALF_HDP = readHead1("half-hdp");
+    public static final int HALF_HDP = string2int(readHead1("half-hdp"));
     public static final float TARGET_H = 0.05f;	//目标色相与0.0f的距离
     public static final float TARGET_S = 1.0f;	//目标饱和度
     public static final double TARGET_MUL_B = 0.5;	//亮度增量乘数
@@ -73,7 +83,8 @@ public class MS2Frame{
 	SecretKey sks = new SecretKey(password);
 	*/
 	
-	int pictureCount = readHead1("t")*readHead1("r") / (2*HALF_HDP*REPEAT);
+	int tMulR = string2int(readHead1("t"))*string2int(readHead1("r"));
+	int pictureCount = tMulR / (2*HALF_HDP*REPEAT);
 	
 	File dir;
 	for(int k=0;k<args.length;++k){
@@ -89,13 +100,16 @@ public class MS2Frame{
     public static int choosen2frame(File[] sPaths) throws IOException {
 	randomSort(sPaths);
 	File sf,mf;
+	String sp,mp;
 	BufferedImage s,m;
 	int successCount = 0;
 	for(int k=0; k<sPaths.length; ++k){
 		sf = sPaths[k];
-		mf = new File(pathS2M(sf.getPath()));
+		sp = sf.getPath();
+		mp = pathS2M(sp);
+		mf = new File(mp);
 		if( ! mf.exists() ){
-			sErr().println("没找到："+mf.getPath());
+			sErr().println("掩码图"+sp+"没找到源图："+mf.getPath());
 			continue;
 		}
 		if( mf.isDirectory() || ( ! sf.isFile()) ) 
@@ -111,7 +125,8 @@ public class MS2Frame{
     public static void ms2frame(BufferedImage m, BufferedImage s) {
 	int r = s.getWidth();
 	int c = s.getHeight();
-	if( r > m.getWidth() || c > m.getHeight() ) throw new AssertionError();
+	if( r > m.getWidth() || c > m.getHeight() )
+		throw new AssertionError();
 	int rb=-1,re=0,cb=(c-1),ce=0; // 二维for循环计算 选区 窗口 矩阵 坐标
 	for(int i=0; i<r; ++i){
 	    for(int j=0; j<c; ++j){
@@ -160,6 +175,7 @@ public class MS2Frame{
 			for(int f=0;f<frames.length;++f)
 				ImageIO.write(frames[f], FRAME_FORMAT, sOut());
 	}catch(IOException ex){
+    		ex.printStackTrace();
 		throw new AssertionError();
 	}
     }
