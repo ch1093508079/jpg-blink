@@ -7,6 +7,31 @@ import javax.imageio.*;
 
 public class Tools{
     public static final String FILE_SEP = "/";
+    public static final String FRAME_FORMAT = Tools.readHead1("frame-format");
+    private static final int F_OUT_DEBUG = Tools.string2int(Tools.readHead1("f-out-debug"));
+    private static final String F_OUT_PATH = "F_OUT_DEBUG";
+    private static int F_OUT_SUFFIX = 0;
+    public static OutputStream sOut() {
+	if( F_OUT_DEBUG == 0 ) return System.out;
+	++F_OUT_SUFFIX; 
+	try{
+		new File(F_OUT_PATH).mkdir();
+		String name = F_OUT_SUFFIX+"."+FRAME_FORMAT;
+		return new FileOutputStream(F_OUT_PATH + Tools.FILE_SEP + name);
+	}catch(FileNotFoundException ex){
+    		ex.printStackTrace();
+		throw new AssertionError();
+	}
+    }
+    public static void randomSort(File[] array) {
+	    java.util.Random r = new java.util.Random();
+	    for(int i=0; i < array.length ; ++i){
+		    int t = r.nextInt(array.length);
+		    File temp = array[i];
+		    array[i] = array[t];
+		    array[t] = temp;
+	    }
+    }
     public static final int whiteRGB = Color.WHITE.getRGB();
     /** 当前版本只有 s 中的纯白像素才是选区 */
     public static boolean isChooes(BufferedImage s, int x, int y) {

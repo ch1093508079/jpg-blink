@@ -6,37 +6,13 @@ import java.awt.image.*;
 import javax.imageio.*;
 
 import src.Tools;
+import src.PixelCompute;
 
 public class MS2Frame{
-    private static final int F_OUT_DEBUG = Tools.string2int(Tools.readHead1("f-out-debug"));
-    public static final boolean DEBUG = false;
-    public static final String FRAME_FORMAT = Tools.readHead1("frame-format");
-    public static final int REPEAT = ( F_OUT_DEBUG!=0 ? 1 : ( DEBUG ? 2 : 3 ) );
-    
-    private static final String F_OUT_PATH = "F_OUT_DEBUG";
-    private static int F_OUT_SUFFIX = 0;
-    private static OutputStream sOut() {
-	if( F_OUT_DEBUG == 0 ) return System.out;
-	++F_OUT_SUFFIX; 
-	try{
-		new File(F_OUT_PATH).mkdir();
-		String name = F_OUT_SUFFIX+"."+FRAME_FORMAT;
-		return new FileOutputStream(F_OUT_PATH + Tools.FILE_SEP + name);
-	}catch(FileNotFoundException ex){
-    		ex.printStackTrace();
-		throw new AssertionError();
-	}
-    }
 
-    public static void randomSort(File[] array) {
-	    java.util.Random r = new java.util.Random();
-	    for(int i=0; i < array.length ; ++i){
-		    int t = r.nextInt(array.length);
-		    File temp = array[i];
-		    array[i] = array[t];
-		    array[t] = temp;
-	    }
-    }
+    public static final boolean DEBUG = false;
+    public static final String VIDEO_PATH = "video";
+    
     public static String pathS2M(String path) {
 //	int index = FILE_SEP.length() + path.lastIndexOf(FILE_SEP+"S"+FILE_SEP);
 	StringBuilder sb = new StringBuilder(path);
@@ -60,7 +36,7 @@ public class MS2Frame{
 	
 	int tHead1 = Tools.string2int(Tools.readHead1("t"));
 	int rHead1 = Tools.string2int(Tools.readHead1("r"));
-	int pictureCount = tHead1 * rHead1 / (2*PixelCompute.HALF_HDP*REPEAT);
+	int pictureCount = tHead1 * rHead1 / (2*PixelCompute.HALF_HDP*PixelCompute.REPEAT);
 	
 	File dir;
 	for(int k=0;k<args.length;++k){
@@ -74,7 +50,8 @@ public class MS2Frame{
 	}
     }
     public static int choosen2frame(File[] sPaths) throws IOException {
-	randomSort(sPaths);
+	new File(VIDEO_PATH).mkdir();
+	Tools.randomSort(sPaths);
 	File sf,mf;
 	String sp,mp;
 	BufferedImage s,m;
@@ -93,59 +70,15 @@ public class MS2Frame{
 		s = ImageIO.read(sf);
 		m = ImageIO.read(mf);
 		++successCount;
-		ms2frame(m, s);
+		writeFrames(PixelCompute.ms2frame(m, s));
 	}
 	return successCount;
     }
-    public static void ms2frame(BufferedImage m, BufferedImage s) {
-	int r = s.getWidth();
-	int c = s.getHeight();
-	if( r > m.getWidth() || c > m.getHeight() )
-		throw new AssertionError();
-	int rb=-1,re=0,cb=(c-1),ce=0; // 二维for循环计算 选区 窗口 矩阵 坐标
-	for(int i=0; i<r; ++i){
-	    for(int j=0; j<c; ++j){
-		if( Tools.isChooes( s,i,j ) ){
-		    if(rb == -1) rb = i; // 首个选区像素可确定rb
-		    re = i; // 最后一个选区像素可确定re
-		    cb = (j<cb)?j:cb;
-		    ce = (j>ce)?j:ce; 
-	   	}
-	    }
-	}
-	//以上均为优化运行时间的设计，如不需要可直接调用 screen2frame(0, r, 0, c, m, s)
-	screen2frame(rb, re, cb, ce, m, s);
-    }
-    public static void screen2frame(int rb, int re, int cb, int ce, 
-    					BufferedImage m, BufferedImage s) {
-	BufferedImage[] frames = new BufferedImage[PixelCompute.HALF_HDP*2];
-	frames[0] = m;	//首帧使用（可能被darker()处理过的）m 
-/* 三重循环算出半程帧并引用于后半程 ( 以 HALF_HDP==6 , step==30时为例 ) 
- * 帧组下标： 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11（0为原图）
- * 分量深度：30,40,50,60,70,80,max,80,70,60,50,40（100为原图深度）
- */
-	float[] hsbvals = new float[3];
-	for(int k=1; k <= PixelCompute.HALF_HDP ;k++){ 
-	    frames[k] = Tools.imClone(m);
-	    for(int x = rb; x <= re; ++x){
-	    	for(int y = cb; y <= ce; ++y){
-			if( ! Tools.isChooes(s,x,y))
-				continue;
-			Tools.getHSB(m, x, y, hsbvals); 
-			PixelCompute.computeHSB(hsbvals, k);
-			frames[k].setRGB(x,y, Color.HSBtoRGB(hsbvals[0],
-						hsbvals[1],hsbvals[2]));
-	    	}
-	    }
-	    frames[frames.length-k] = frames[k]; //往返闪烁
-	}
-	writeFrames(frames); //REPEAT次一重循环写入帧
-    }
     public static void writeFrames(BufferedImage[] frames){
 	try{
-		for(int t=0;t<REPEAT;++t)
+		for(int t=0;t<PixelCompute.REPEAT;++t)
 			for(int f=0;f<frames.length;++f)
-				ImageIO.write(frames[f], FRAME_FORMAT, sOut());
+				ImageIO.write(frames[f], Tools.FRAME_FORMAT, Tools.sOut());
 	}catch(IOException ex){
     		ex.printStackTrace();
 		throw new AssertionError();
@@ -153,18 +86,3 @@ public class MS2Frame{
     }
 }
 
-class PixelCompute{
-    public static final int HALF_HDP = Tools.string2int(Tools.readHead1("half-hdp"));
-    public static final float TARGET_H = 0.05f;	//目标色相与0.0f的距离
-    public static final float TARGET_S = 1.0f;	//目标饱和度
-    public static final double TARGET_MUL_B = 0.5;	//亮度增量乘数
-
-    public static void computeHSB(float[] hsb, int k){
-    	hsb[0] = divideLine(hsb[0], (hsb[0]<0.5) ? TARGET_H : (1-TARGET_H), k);
-    	hsb[1] = divideLine(hsb[1], TARGET_S, k);
-	hsb[2] = divideLine(hsb[2], (float)(hsb[2]+(1-hsb[2])*TARGET_MUL_B), k);
-    }
-    public static float divideLine(float from, float to, int select){
-	    return (from + select*(to-from)/HALF_HDP);
-    }
-}
