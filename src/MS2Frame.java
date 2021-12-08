@@ -36,8 +36,9 @@ public class MS2Frame{
 	
 	int tHead1 = Tools.string2int(Tools.readHead1("t"));
 	int rHead1 = Tools.string2int(Tools.readHead1("r"));
-	int pictureCount = tHead1 * rHead1 / (2*PixelCompute.HALF_HDP*PixelCompute.REPEAT);
-	
+	int framePerPicture = 2*PixelCompute.HALF_HDP*PixelCompute.REPEAT;
+	int pictureCount = tHead1 * rHead1 / framePerPicture;
+//TODO
 	File dir;
 	for(int k=0;k<args.length;++k){
 		dir = new File(args[k]);

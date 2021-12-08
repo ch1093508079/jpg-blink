@@ -2,9 +2,7 @@
 用java为图片的选区添加闪烁效果，用ffmpeg以视频输出
 
 ## 环境配置
-sudo apt install make
-sudo apt install default-jdk
-sudo apt install ffmpeg
+sudo apt install make default-jdk ffmpeg
 
 ## makefile
 ### make test
