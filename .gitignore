@@ -1,3 +1,9 @@
+/F_OUT_DEBUG
+/video
+*.swp
+
+## 以下为GitHub生成 
+
 # Compiled class file
 *.class
 
