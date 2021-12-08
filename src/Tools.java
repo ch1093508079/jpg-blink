@@ -23,11 +23,11 @@ public class Tools{
 		throw new AssertionError();
 	}
     }
-    public static void randomSort(File[] array) {
+    public static void randomSort(String[] array) {
 	    java.util.Random r = new java.util.Random();
 	    for(int i=0; i < array.length ; ++i){
 		    int t = r.nextInt(array.length);
-		    File temp = array[i];
+		    String temp = array[i];
 		    array[i] = array[t];
 		    array[t] = temp;
 	    }

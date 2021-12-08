@@ -37,8 +37,5 @@ clean:
 shred_f_out_debug: 
 	shred -v -u F_OUT_DEBUG/*.*
 
-shred_all: clean shred_f_out_debug 
+shred_video:
 	shred -v -u --iterations=1 video/*
-	shred -v -u --iterations=1 picture/*/*/*.*
-	shred -v -u --iterations=1 picture/*/*.*
-	shred -v -u --iterations=1 picture/*.*

@@ -47,7 +47,7 @@ public class MS2Frame{
     }
     public static int choosen2frame(String[] sPaths) throws IOException {
 	new File(VIDEO_PATH).mkdir();
-//	Tools.randomSort(sPaths);
+	Tools.randomSort(sPaths);
 	File sf,mf;
 	String sp,mp;
 	BufferedImage s,m;
