@@ -38,28 +38,23 @@ public class MS2Frame{
 	int rHead1 = Tools.string2int(Tools.readHead1("r"));
 	int framePerPicture = 2*PixelCompute.HALF_HDP*PixelCompute.REPEAT;
 	int pictureCount = tHead1 * rHead1 / framePerPicture;
-//TODO
-	File dir;
-	for(int k=0;k<args.length;++k){
-		dir = new File(args[k]);
-		int successCount = choosen2frame(dir.listFiles());
-		Tools.sErr().println("还剩至少"+pictureCount+"张图片，本轮处理数量："+successCount);
-		Tools.sErr().println("当前文件夹："+dir.getPath());
-		pictureCount -= successCount;
-		if(pictureCount<=0)
-			break;
-	}
+
+	int successCount = choosen2frame(args);
+	Tools.sErr().println("还剩至少"+pictureCount+"张图片，本轮处理数量："+successCount);
+	pictureCount -= successCount;
+	if(pictureCount<=0)
+		return;	//有待商榷
     }
-    public static int choosen2frame(File[] sPaths) throws IOException {
+    public static int choosen2frame(String[] sPaths) throws IOException {
 	new File(VIDEO_PATH).mkdir();
-	Tools.randomSort(sPaths);
+//	Tools.randomSort(sPaths);
 	File sf,mf;
 	String sp,mp;
 	BufferedImage s,m;
 	int successCount = 0;
 	for(int k=0; k<sPaths.length; ++k){
-		sf = sPaths[k];
-		sp = sf.getPath();
+		sp = sPaths[k];
+		sf = new File(sp);
 		mp = pathS2M(sp);
 		mf = new File(mp);
 		if( ! mf.exists() ){
