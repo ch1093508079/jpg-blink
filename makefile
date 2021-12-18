@@ -1,5 +1,10 @@
-default: sample
-	echo visit sample to understand how it works
+
+config-factor: 
+	echo 300 > config/t.head-1
+	echo 0  > config/f-out-debug.head-1
+
+factor: all-class config-factor
+	java src.MS2Frame /home/ch/文档/mAndS/*/*.`head -1 config/mask-suffix.head-1` | ffmpeg -r `head -1 config/r.head-1` -i pipe:0 -vcodec libx264 -pix_fmt yuv420p -acodec aac -y -ss 0 -t `head -1 config/t.head-1` "video/`date`.mp4"
 
 config-test: 
 	echo 20 > config/t.head-1

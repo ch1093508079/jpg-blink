@@ -11,7 +11,7 @@ import src.Tools;
 public class PixelCompute{
     public static final int REPEAT = 3;
     public static final int HALF_HDP = Tools.string2int(Tools.readHead1("half-hdp"));
-    public static final float TARGET_H = 0.05f;	//目标色相与0.0f的距离
+    public static final float TARGET_H = 0.07f;	//目标色相与0.0f的距离
     public static final float TARGET_S = 1.0f;	//目标饱和度
     public static final double TARGET_MUL_B = 0.5;	//亮度增量乘数
 
