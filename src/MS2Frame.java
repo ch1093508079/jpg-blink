@@ -9,13 +9,12 @@ import src.Tools;
 import src.PixelCompute;
 
 public class MS2Frame{
-
     public static final boolean DEBUG = false;
     public static final String VIDEO_PATH = "video";
     
     public static String pathS2M(String path) {
-//	int index = FILE_SEP.length() + path.lastIndexOf(FILE_SEP+"S"+FILE_SEP);
 	StringBuilder sb = new StringBuilder(path);
+//	int index = FILE_SEP.length() + path.lastIndexOf(FILE_SEP+"S"+FILE_SEP);
 //	sb.setCharAt(index, 'M');
 	return sb.substring( 0 , path.lastIndexOf('.') );//去掉后缀
     }
@@ -24,34 +23,20 @@ public class MS2Frame{
 		System.err.println("需要参数：指示选区的掩码图片的路径集");
 		return;
 	}
-	if(args.length == 1 && args[0].indexOf('*') != -1){
-		System.err.println(args[0] + "为空，程序退出");
-		return;
-	}
-	/*
-	java.util.Scanner scan = new java.util.Scanner(System.in);
-	String password = scan.nextline();
-	SecretKey sks = new SecretKey(password);
-	*/
 	
 	int tHead1 = Tools.string2int(Tools.readHead1("t"));
 	int rHead1 = Tools.string2int(Tools.readHead1("r"));
-	int framePerPicture = 2*PixelCompute.HALF_HDP*PixelCompute.REPEAT;
+	int framePerPicture = 2 * PixelCompute.HALF_HDP * PixelCompute.REPEAT;
 	int pictureCount = tHead1 * rHead1 / framePerPicture;
 
-	int successCount = choosen2frame(args);
-	Tools.sErr().println("还剩至少"+pictureCount+"张图片，本轮处理数量："+successCount);
-	pictureCount -= successCount;
-	if(pictureCount<=0)
-		return;	//有待商榷
+	choosen2frame(args, pictureCount);
     }
-    public static int choosen2frame(String[] sPaths) throws IOException {
+    public static void choosen2frame(String[] sPaths, int pictureCount) throws IOException {
 	new File(VIDEO_PATH).mkdir();
 	Tools.randomSort(sPaths);
 	File sf,mf;
 	String sp,mp;
 	BufferedImage s,m;
-	int successCount = 0;
 	for(int k=0; k<sPaths.length; ++k){
 		sp = sPaths[k];
 		sf = new File(sp);
@@ -65,10 +50,12 @@ public class MS2Frame{
 			throw new AssertionError();
 		s = ImageIO.read(sf);
 		m = ImageIO.read(mf);
-		++successCount;
 		writeFrames(PixelCompute.ms2frame(m, s));
+		Tools.sErr().println("还剩"+pictureCount+"张图片");
+		pictureCount -= 1;
+		if(pictureCount<=0)
+			return;
 	}
-	return successCount;
     }
     public static void writeFrames(BufferedImage[] frames){
 	try{
