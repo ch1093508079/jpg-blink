@@ -11,6 +11,7 @@ import src.PixelCompute;
 public class MS2Frame{
     public static final boolean DEBUG = false;
     public static final String VIDEO_PATH = "video";
+    public static final int REPEAT = 3;
     
     public static String pathS2M(String path) {
 	StringBuilder sb = new StringBuilder(path);
@@ -26,7 +27,7 @@ public class MS2Frame{
 	
 	int tHead1 = Tools.string2int(Tools.readHead1("t"));
 	int rHead1 = Tools.string2int(Tools.readHead1("r"));
-	int framePerPicture = 2 * PixelCompute.HALF_HDP * PixelCompute.REPEAT;
+	int framePerPicture = 2 * PixelCompute.HALF_HDP * REPEAT;
 	int pictureCount = tHead1 * rHead1 / framePerPicture;
 
 	choosen2frame(args, pictureCount);
@@ -59,7 +60,7 @@ public class MS2Frame{
     }
     public static void writeFrames(BufferedImage[] frames){
 	try{
-		for(int t=0;t<PixelCompute.REPEAT;++t)
+		for(int t=0;t<REPEAT;++t) //REPEAT次一重循环写入帧
 			for(int f=0;f<frames.length;++f)
 				ImageIO.write(frames[f], Tools.FRAME_FORMAT, Tools.sOut());
 	}catch(IOException ex){

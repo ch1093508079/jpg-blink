@@ -9,7 +9,6 @@ import javax.imageio.*;
 import src.Tools;
 
 public class PixelCompute{
-    public static final int REPEAT = 3;
     public static final int HALF_HDP = Tools.string2int(Tools.readHead1("half-hdp"));
     public static final float TARGET_H = 0.07f;	//目标色相与0.0f的距离
     public static final float TARGET_S = 1.0f;	//目标饱和度
@@ -21,7 +20,7 @@ public class PixelCompute{
 	hsb[2] = divideLine(hsb[2], (float)(hsb[2]+(1-hsb[2])*TARGET_MUL_B), k);
     }
     public static float divideLine(float from, float to, int select){
-	    return (from + select*(to-from)/HALF_HDP);
+    	return (from + select*(to-from)/HALF_HDP);
     }
     public static BufferedImage[] ms2frame(BufferedImage m, BufferedImage s) {
 	int r = s.getWidth();
@@ -58,39 +57,13 @@ public class PixelCompute{
 			if( ! Tools.isChooes(s,x,y))
 				continue;
 			Tools.getHSB(m, x, y, hsbvals); 
-			PixelCompute.computeHSB(hsbvals, k);
-			frames[k].setRGB(x,y, Color.HSBtoRGB(hsbvals[0],
+			computeHSB(hsbvals, k);
+			frames[k].setRGB(x, y, Color.HSBtoRGB(hsbvals[0],
 						hsbvals[1],hsbvals[2]));
 	    	}
 	    }
 	    frames[frames.length-k] = frames[k]; //往返闪烁
 	}
-	return frames; //REPEAT次一重循环写入帧
-    }
-    public static void writeFrames(BufferedImage[] frames){
-	try{
-		for(int t=0;t<REPEAT;++t)
-			for(int f=0;f<frames.length;++f)
-				ImageIO.write(frames[f], Tools.FRAME_FORMAT, Tools.sOut());
-	}catch(IOException ex){
-    		ex.printStackTrace();
-		throw new AssertionError();
-	}
+	return frames;
     }
 }
-//
-//class PixelCompute{
-//    public static final int HALF_HDP = Tools.string2int(Tools.readHead1("half-hdp"));
-//    public static final float TARGET_H = 0.05f;	//目标色相与0.0f的距离
-//    public static final float TARGET_S = 1.0f;	//目标饱和度
-//    public static final double TARGET_MUL_B = 0.5;	//亮度增量乘数
-//
-//    public static void computeHSB(float[] hsb, int k){
-//    	hsb[0] = divideLine(hsb[0], (hsb[0]<0.5) ? TARGET_H : (1-TARGET_H), k);
-//    	hsb[1] = divideLine(hsb[1], TARGET_S, k);
-//	hsb[2] = divideLine(hsb[2], (float)(hsb[2]+(1-hsb[2])*TARGET_MUL_B), k);
-//    }
-//    public static float divideLine(float from, float to, int select){
-//	    return (from + select*(to-from)/HALF_HDP);
-//    }
-//}
